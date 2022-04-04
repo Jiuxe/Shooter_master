@@ -52,18 +52,18 @@ class Player(pygame.sprite.Sprite):
 class Meteor(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load("../assets/meteorGrey_med1.png").convert()
+        self.image = random.choice(meteors_images)
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.x = random.randrange(WINDOW_WIDTH - self.rect.width)
-        self.rect.y = random.randrange(-100, -40)
+        self.rect.y = random.randrange(-140, -100)
         self.speed_y = random.randrange(1, 10)
         self.speed_x = random.randrange(-5, 5)
 
     def update(self):
         self.rect.y += self.speed_y
         self.rect.x += self.speed_x
-        if self.rect.top > WINDOW_HEIGHT + 10 or self.rect.left < -25 or self.rect.right > WINDOW_WIDTH + 25:
+        if self.rect.top > WINDOW_HEIGHT + 10 or self.rect.left < -100 or self.rect.right > WINDOW_WIDTH + 100:
             self.rect.x = random.randrange(WINDOW_WIDTH - self.rect.width)
             self.rect.y = random.randrange(-100, -40)
             self.speed_y = random.randrange(1, 10)
@@ -83,6 +83,16 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.y += self.speed_y
         if self.rect.bottom < 0:
             self.kill()
+
+meteors_images= []
+meteor_list = ["../assets/meteorGrey_med1.png", "../assets/meteorGrey_med2.png",
+               "../assets/meteorGrey_small1.png", "../assets/meteorGrey_small2.png",
+               "../assets/meteorGrey_tiny1.png", "../assets/meteorGrey_tiny2.png",
+               "../assets/meteorGrey_big1.png", "../assets/meteorGrey_big2.png",
+               "../assets/meteorGrey_big3.png", "../assets/meteorGrey_big4.png"]
+
+for image in meteor_list:
+    meteors_images.append(pygame.image.load(image).convert())
 
 background = pygame.image.load("../assets/background.png").convert()
 
