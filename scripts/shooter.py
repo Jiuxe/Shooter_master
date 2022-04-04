@@ -48,6 +48,7 @@ class Player(pygame.sprite.Sprite):
         bullet = Bullet(self.rect.centerx, self.rect.top)
         all_sprites.add(bullet)
         bullets.add(bullet)
+        laser_sound.play()
 
 class Meteor(pygame.sprite.Sprite):
     def __init__(self):
@@ -96,6 +97,12 @@ for image in meteor_list:
 
 background = pygame.image.load("../assets/background.png").convert()
 
+laser_sound = pygame.mixer.Sound("../assets/laser5.ogg")
+explosion_sound = pygame.mixer.Sound("../assets/explosion.wav")
+pygame.mixer.music.load("../assets/music.ogg")
+pygame.mixer.music.set_volume(0.2)
+
+
 all_sprites = pygame.sprite.Group()
 meteors_list = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
@@ -110,6 +117,7 @@ for i in range(8):
 
 running = True
 score = 0
+pygame.mixer.music.play(loops=-1)
 
 while running:
     clock.tick(60)
@@ -128,6 +136,7 @@ while running:
         meteor = Meteor()
         all_sprites.add(meteor)
         meteors_list.add(meteor)
+        explosion_sound.play()
 
     hits = pygame.sprite.spritecollide(player, meteors_list, True)
 
