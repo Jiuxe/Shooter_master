@@ -29,6 +29,21 @@ def draw_shield_bar(surface, x, y, percentage):
     pygame.draw.rect(surface, GREEN , fill_rect)
     pygame.draw.rect(surface, WHITE, outline_rect, 2)
 
+def show_go_screen():
+    screen.fill(BLACK)
+    draw_text(screen, "Shooter", 64, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 4)
+    draw_text(screen, "Arrow keys move, Space to fire", 22, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
+    draw_text(screen, "Press Enter to begin", 18, WINDOW_WIDTH / 2, WINDOW_HEIGHT * 3 / 4)
+    pygame.display.flip()
+    waiting = True
+    while waiting:
+        clock.tick(5)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE):
+                pygame.quit()
+            if event.type == pygame.KEYUP and event.key == pygame.K_RETURN:
+                waiting = False
+
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -96,6 +111,30 @@ class Bullet(pygame.sprite.Sprite):
         if self.rect.bottom < 0:
             self.kill()
 
+class Explosion(pygame.sprite.Sprite):
+
+    def __init__(self, center):
+        super().__init__()
+        self.image = explosion_anim[0]
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+        self.frame = 0
+        self.last_update = pygame.time.get_ticks()
+        self.frame_rate = 50
+
+    def update(self):
+        now = pygame.time.get_ticks()
+        if now - self.last_update > self.frame_rate:
+            self.last_update = now
+            self.frame += 1
+            if self.frame == len(explosion_anim):
+                self.kill()
+            else:
+                center = self.rect.center
+                self.image = explosion_anim[self.frame]
+                self.rect = self.image.get_rect()
+                self.rect.center = center
+
 meteors_images= []
 meteor_list = ["../assets/meteorGrey_med1.png", "../assets/meteorGrey_med2.png",
                "../assets/meteorGrey_small1.png", "../assets/meteorGrey_small2.png",
@@ -105,6 +144,15 @@ meteor_list = ["../assets/meteorGrey_med1.png", "../assets/meteorGrey_med2.png",
 
 for image in meteor_list:
     meteors_images.append(pygame.image.load(image).convert())
+
+explosion_anim = []
+for i in range(9):
+    file = "../assets/regularExplosion0{}.png".format(i)
+    img = pygame.image.load(file).convert()
+    img.set_colorkey(BLACK)
+    img_lg = pygame.transform.scale(img, (75, 75))
+    explosion_anim.append(img_lg)
+
 
 background = pygame.image.load("../assets/background.png").convert()
 
@@ -128,9 +176,30 @@ for i in range(8):
 
 running = True
 score = 0
+game_over = True
 pygame.mixer.music.play(loops=-1)
 
 while running:
+
+    if game_over:
+        game_over = False
+
+        show_go_screen()
+
+        all_sprites = pygame.sprite.Group()
+        meteors_list = pygame.sprite.Group()
+        bullets = pygame.sprite.Group()
+
+        player = Player()
+        all_sprites.add(player)
+
+        for i in range(8):
+            meteor = Meteor()
+            all_sprites.add(meteor)
+            meteors_list.add(meteor)
+
+        score = 0
+
     clock.tick(60)
     for event in pygame.event.get():
         if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
@@ -145,6 +214,8 @@ while running:
     for hit in hits:
         score += 10
         meteor = Meteor()
+        explosion = Explosion(hit.rect.center)
+        all_sprites.add(explosion)
         all_sprites.add(meteor)
         meteors_list.add(meteor)
         explosion_sound.play()
@@ -157,7 +228,7 @@ while running:
         all_sprites.add(meteor)
         meteors_list.add(meteor)
         if player.shielf <= 0:
-            running = False
+            game_over = True
 
     screen.blit(background,[0,0])
 
