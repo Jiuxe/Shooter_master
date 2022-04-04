@@ -5,6 +5,7 @@ WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+GREEN = (0, 255, 0)
 
 pygame.init()
 pygame.mixer.init()
@@ -19,6 +20,15 @@ def draw_text(surface, text, size, x, y):
     text_rect.midtop = (x, y)
     surface.blit(text_surface, text_rect)
 
+def draw_shield_bar(surface, x, y, percentage):
+    BAR_LENGTH = 100
+    BAR_HEIGHT = 10
+    fill = (percentage / 100) * BAR_LENGTH
+    outline_rect = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
+    fill_rect = pygame.Rect(x, y, fill, BAR_HEIGHT)
+    pygame.draw.rect(surface, GREEN , fill_rect)
+    pygame.draw.rect(surface, WHITE, outline_rect, 2)
+
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -28,6 +38,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.centerx = WINDOW_WIDTH // 2
         self.rect.bottom = WINDOW_HEIGHT - 10
         self.speed_x = 0
+        self.shielf = 100
 
     def update(self):
         self.speed_x = 0
@@ -141,13 +152,20 @@ while running:
     hits = pygame.sprite.spritecollide(player, meteors_list, True)
 
     if hits:
-        running = False
+        player.shielf -= 20
+        meteor = Meteor()
+        all_sprites.add(meteor)
+        meteors_list.add(meteor)
+        if player.shielf <= 0:
+            running = False
 
     screen.blit(background,[0,0])
 
     all_sprites.draw(screen)
 
     draw_text(screen, str(score), 18, WINDOW_WIDTH // 2, 10)
+
+    draw_shield_bar(screen, 5, 5, player.shielf)
 
     pygame.display.flip()
 
